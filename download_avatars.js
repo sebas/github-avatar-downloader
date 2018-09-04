@@ -2,6 +2,10 @@ var request = require('request');
 var fs = require('fs');
 var secrets = require('./secrets');
 
+
+// Get the command line parameters and make sure
+// we have all that we need, print an error and exit
+// if we don't.
 let repoOwner = process.argv[2];
 let repoName = process.argv[3];
 
@@ -14,6 +18,9 @@ console.log("repoName: ", repoName);
 
 console.log('Welcome to the GitHub Avatar Downloader!');
 
+// Get a repository owner and a repository and get all the
+// contributors information from Github.
+// Pass that information to our callback function
 function getRepoContributors(repoOwner, repoName, cb) {
     console.log("Great so you want:");
     console.log("   Repository owner: ", repoOwner);
@@ -27,39 +34,30 @@ function getRepoContributors(repoOwner, repoName, cb) {
         }
       };
 
-    // console.log("opt ", options);
-
     request(options, function(err, res, body) {
-        console.log("body: ", body);      
-        console.log("err: ", err);
         cb(err, JSON.parse(body));
     });  
   }
 
-  // getRepoContributors("jquery", "jquery", function(err, result) {
-  // getRepoContributors("sebas", "nodefsex", function(err, result) {
+    // Loop through the avatars calling a function to download them.
     getRepoContributors(repoOwner, repoName, function(err, result) {     
-    console.log("Errors:", err);
-    console.log("Result:", result);
     for (let index = 0; index < result.length; index++) {
         const element = result[index];
-        console.log("The avatar URL", element.avatar_url);
         downloadImageByURL( element.avatar_url, 'avatars/' + index + '.jpg');
     }
+    console.log('Download complete.');
   }); 
 
+  // Given an URL and a path save that to our
+  // hard drive.
   function downloadImageByURL(url, filePath) {
-    console.log('Downloading image...');
 
     request.get(url)
         .on('error', function (err) {
             throw err; 
         })
-        .on('response', function (response) {
-            console.log('Response Status Code: ', response.statusCode);
-        })
         .on('end', function (response) {
-            console.log('Download complete.');
+            
         })
         .pipe(fs.createWriteStream(filePath)
         );     
