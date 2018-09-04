@@ -5,6 +5,9 @@ var secrets = require('./secrets');
 let repoOwner = process.argv[2];
 let repoName = process.argv[3];
 
+if(repoOwner === undefined || repoName === undefined) {
+    console.log("You need to pass both parameters");
+} else {
 
 console.log("repoOwner: ", repoOwner);
 console.log("repoName: ", repoName);
@@ -61,3 +64,5 @@ function getRepoContributors(repoOwner, repoName, cb) {
         .pipe(fs.createWriteStream(filePath)
         );     
   }
+
+}
