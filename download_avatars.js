@@ -1,13 +1,15 @@
-var request = require('request');
-var fs = require('fs');
-var secrets = require('./secrets');
+const request = require('request'),
+  fs = require('fs');
 
+require('dotenv').config();
+
+const { GITHUB_TOKEN } = process.env;
 
 // Get the command line parameters and make sure
 // we have all that we need, print an error and exit
 // if we don't.
-let repoOwner = process.argv[2];
-let repoName = process.argv[3];
+const repoOwner = process.argv[2];
+const repoName = process.argv[3];
 
 // Given an URL and a path save that to our
 // hard drive.
@@ -33,7 +35,7 @@ function getRepoContributors(repoOwner, repoName, cb) {
     url: "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/contributors",
     headers: {
       'User-Agent': 'request',
-      'Authorization': 'token ' + secrets.GITHUB_TOKEN
+      'Authorization': 'token ' + GITHUB_TOKEN
     }
   };
 
@@ -44,19 +46,16 @@ function getRepoContributors(repoOwner, repoName, cb) {
 
 if(repoOwner === undefined || repoName === undefined) {
   console.log("You need to pass both parameters");
-} else {
-
-  console.log("repoOwner: ", repoOwner);
-  console.log("repoName: ", repoName);
-
-  console.log('Welcome to the GitHub Avatar Downloader!');
-
-  // Loop through the avatars calling a function to download them.
-  getRepoContributors(repoOwner, repoName, function(err, result) {     
-    for (let index = 0; index < result.length; index++) {
-      const element = result[index];
-      downloadImageByURL( element.avatar_url, 'avatars/' + index + '.jpg');
-    }
-    console.log('Download complete.');
-  }); 
+  process.exit();
 }
+
+console.log('Welcome to the GitHub Avatar Downloader!');
+
+// Loop through the avatars calling a function to download them.
+getRepoContributors(repoOwner, repoName, function(err, results) {     
+  for (let index = 0; index < results.length; index++) {
+    const result = results[index];
+    downloadImageByURL( result.avatar_url, 'avatars/' + index + '.jpg');
+  }
+  console.log('Download complete.');
+});
